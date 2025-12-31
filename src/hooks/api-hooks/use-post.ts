@@ -1,5 +1,12 @@
 import { postsAPI } from "@/src/config/api/post/post.api";
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+const queryClient = useQueryClient();
 
 export function useAllPosts() {
   return useQuery({
@@ -23,6 +30,10 @@ export function useCreatePost() {
   return useMutation({
     mutationKey: ["create-post"],
     mutationFn: postsAPI.createPost,
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["get-posts"],
+      }),
   });
 }
 
@@ -30,5 +41,9 @@ export function useUpdatePost() {
   return useMutation({
     mutationKey: ["update-post"],
     mutationFn: postsAPI.updatePost,
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: ["get-posts"],
+      }),
   });
 }
