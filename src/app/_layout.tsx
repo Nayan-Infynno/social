@@ -29,24 +29,9 @@ export default function RootLayout() {
             <QueryProvider>
               <ThemeProvider value={DefaultTheme}>
                 <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen
-                    name="index"
-                    options={{ title: "List of Posts" }}
-                  />
-                  <Stack.Screen
-                    name="posts/[id]"
-                    options={{
-                      title: "Post Details",
-                      headerTitleAlign: "center",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="posts/create-post"
-                    options={{
-                      title: "Create Post",
-                      headerTitleAlign: "center",
-                    }}
-                  />
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="posts/[id]" />
+                  <Stack.Screen name="posts/create-post" />
                 </Stack>
                 <StatusBar style="auto" />
                 <Toaster position="top-center" />
