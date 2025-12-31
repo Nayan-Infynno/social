@@ -48,7 +48,6 @@ axiosInstance.interceptors.response.use(
       }
     }
     if (!error.response) {
-      console.log("Network error:", error.message);
       toast.error(
         "Unable to connect to the server. Please check your internet connection and try again."
       );

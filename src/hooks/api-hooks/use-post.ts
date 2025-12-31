@@ -1,4 +1,4 @@
-import { postsAPI } from "@/src/config/api/post/post.api";
+import { postsAPI } from "@/src/config/api/posts.api";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 
 export function useAllPosts() {
