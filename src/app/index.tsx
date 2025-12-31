@@ -1,5 +1,5 @@
 import { COLORS } from "@/src/constants/theme";
-import { usePostPaginated } from "@/src/hooks/api-hooks/use-post";
+import { usePostPaginated } from "@/src/hooks/use-post";
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";

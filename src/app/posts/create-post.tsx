@@ -1,6 +1,6 @@
 import AppHeader from "@/src/components/AppHeader";
 import { COLORS } from "@/src/constants/theme";
-import { useCreatePost, useUpdatePost } from "@/src/hooks/api-hooks/use-post";
+import { useCreatePost, useUpdatePost } from "@/src/hooks/use-post";
 import { router } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import React, { useState } from "react";
