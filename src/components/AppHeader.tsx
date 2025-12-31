@@ -28,6 +28,10 @@ const AppHeader = ({
       {isShowRightMenu && (
         <Appbar.Action icon={rightMenuTitle} onPress={onPressRightMenu} />
       )}
+      <Appbar.Action
+        icon={"dots-vertical"}
+        onPress={() => router.navigate("/posts/horizontal")}
+      />
     </Appbar.Header>
   );
 };
