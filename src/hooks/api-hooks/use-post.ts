@@ -6,8 +6,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-const queryClient = useQueryClient();
-
 export function useAllPosts() {
   return useQuery({
     queryKey: ["posts"],
@@ -27,6 +25,8 @@ export function usePostPaginated() {
 }
 
 export function useCreatePost() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["create-post"],
     mutationFn: postsAPI.createPost,
@@ -38,6 +38,8 @@ export function useCreatePost() {
 }
 
 export function useUpdatePost() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["update-post"],
     mutationFn: postsAPI.updatePost,
