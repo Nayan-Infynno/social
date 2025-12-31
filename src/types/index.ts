@@ -5,11 +5,14 @@ export interface IPosts {
   id: number;
   title: string;
   body: string;
+  isLiked?: boolean;
 }
 
 export interface IPostCard {
   post: IPosts;
   onPress: () => void;
+  onPressLike: () => void;
+  onPressDislike: () => void;
 }
 
 export interface IEmptyList {
@@ -26,4 +29,8 @@ export interface IAppHeader {
   onPressRightMenu?: () => void;
   contentStyles?: ViewStyle;
   textStyle?: TextStyle;
+}
+
+export interface ILikePostSlice {
+  likePost: string[] | any;
 }

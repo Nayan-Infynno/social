@@ -1,10 +1,5 @@
 import { postsAPI } from "@/src/config/api/post/post.api";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 
 export function useAllPosts() {
   return useQuery({
@@ -25,27 +20,15 @@ export function usePostPaginated() {
 }
 
 export function useCreatePost() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationKey: ["create-post"],
     mutationFn: postsAPI.createPost,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["get-posts"],
-      }),
   });
 }
 
 export function useUpdatePost() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationKey: ["update-post"],
     mutationFn: postsAPI.updatePost,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: ["get-posts"],
-      }),
   });
 }
