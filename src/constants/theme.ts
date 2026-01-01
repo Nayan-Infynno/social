@@ -9,7 +9,7 @@ export const COLORS = {
   icon: "#687076",
   tabIconDefault: "#687076",
   tabIconSelected: tintColorLight,
-  headerColor: "#c4c4c4",
+  headerColor: "#1f1f1f",
 };
 
 export const FONTS = Platform.select({

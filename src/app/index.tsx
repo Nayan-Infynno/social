@@ -1,110 +1,140 @@
 import { COLORS } from "@/src/constants/theme";
-import { usePostPaginated } from "@/src/hooks/use-post";
 import { router } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-import { RefreshControl } from "react-native-gesture-handler";
-import { TextInput } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useMemo, useState } from "react";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import AppHeader from "../components/AppHeader";
-import EmptyList from "../components/EmptyList";
-import FooterList from "../components/FooterList";
-import PostCard from "../components/PostCard";
-import { removeLikePost, setLikePost } from "../slices/like-post-slice";
-import { ILikePostSlice, IPosts } from "../types";
+import CategoryItem from "../components/CategoryItem";
+import {
+  useGetCategories,
+  useProductsBySubCategory,
+  useSubCategories,
+} from "../hooks/use-ceramic";
 
 const index = () => {
-  const dispatch = useDispatch();
-  const [search, setSearch] = useState<string>("");
-  const { likePost } = useSelector((state: ILikePostSlice) => state.likePost);
+  const [selectedId, setSelectedId] = useState<number | null>(59);
+  const [subCategoryId, setSubCategoryId] = useState<number | null>(null);
 
   const {
-    data: posts,
-    isLoading: isPostsLoading,
+    data: categories,
+    isLoading,
+    error,
+  } = useGetCategories({
+    CategoryId: 0,
+    DeviceManufacturer: "Google",
+    DeviceModel: "Android SDK built for x86",
+    DeviceToken: " ",
+    PageIndex: 2,
+  });
+
+  const {
+    data: subCategoriesData,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage: isFetchingNextPosts,
-    isRefetching: isRefreshingPosts,
-    refetch,
-  } = usePostPaginated();
+    isFetchingNextPage,
+  } = useSubCategories(selectedId);
 
-  const getPost = useMemo(() => {
-    return posts?.pages?.flatMap((page: any) => page || []) || [];
-  }, [posts]);
+  const {
+    data,
+    fetchNextPage: fetchNextPageProducts,
+    hasNextPage: hasNextPageProducts,
+    isFetchingNextPage: isFetchingNextPageProducts,
+    isLoading: isLoadingProducts,
+  } = useProductsBySubCategory(Number(subCategoryId));
 
-  const getFinalPost = useMemo(() => {
-    return getPost.map((post: any) => {
-      const isLiked = likePost.some((like: any) => like === post.id);
-      return { ...post, isLiked };
-    });
-  }, [posts, likePost]);
+  const paginatedProducts = useMemo(() => {
+    return data?.pages.flatMap((page) => page.Result) ?? [];
+  }, [data]);
 
-  const filteredPosts = useMemo(() => {
-    if (!search.trim()) return getFinalPost;
+  const subCategories =
+    subCategoriesData?.pages.flatMap(
+      (page) => page.Result.Category[0].SubCategories
+    ) ?? [];
 
-    const lowerSearch = search.toLowerCase();
-
-    return getFinalPost.filter((post: IPosts) =>
-      post.title.toLowerCase().includes(lowerSearch)
+  const getCategories = useMemo(() => {
+    return (
+      categories?.Result?.Category?.flatMap((page: any) => page || []) || []
     );
-  }, [search, getFinalPost]);
+  }, [categories]);
 
-  const onLikeHandler = useCallback((item: IPosts) => {
-    dispatch(setLikePost(item.id));
-  }, []);
+  const renderProduct = ({ item }: { item: any }) => (
+    <View style={{ width: 140, marginRight: 12 }}>
+      <Image
+        source={{ uri: item.ImageName }}
+        style={{ width: 140, height: 140, borderRadius: 8 }}
+      />
+      <Text numberOfLines={2}>{item.Name}</Text>
+      <Text>{item.PriceCode}</Text>
+    </View>
+  );
 
-  const onDislikeHandler = useCallback((item: IPosts) => {
-    dispatch(removeLikePost(item.id));
-  }, []);
+  const onProductEndReached = (id: number) => {
+    if (subCategoryId !== id) {
+      setSubCategoryId(id);
+      return;
+    }
 
-  const handlePostPress = useCallback((item: IPosts) => {
-    router.navigate({
-      pathname: "/posts/create-post",
-      params: { postId: item.id.toString(), post: JSON.stringify(item) },
-    });
-  }, []);
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   return (
     <View style={styles.container}>
       <AppHeader
-        title="List of Posts"
+        title=""
         isShowRightMenu
         rightMenuTitle="pencil"
         onPressRightMenu={() => router.navigate("/posts/create-post")}
       />
-      <TextInput
-        mode="outlined"
-        label="Search"
-        style={styles.search}
-        value={search}
-        onChangeText={setSearch}
-      />
-      <FlatList
-        data={filteredPosts}
-        keyExtractor={(item) => item?.id.toString()}
-        renderItem={({ item }) => (
-          <PostCard
-            post={item}
-            onPress={() => handlePostPress(item)}
-            onPressLike={() => onLikeHandler(item)}
-            onPressDislike={() => onDislikeHandler(item)}
-          />
-        )}
-        extraData={likePost}
-        onEndReached={() => hasNextPage && fetchNextPage()}
-        onEndReachedThreshold={0.5}
-        ListEmptyComponent={<EmptyList isLoadingContent={isPostsLoading} />}
-        ListFooterComponent={isFetchingNextPosts ? <FooterList /> : null}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshingPosts}
-            onRefresh={refetch}
-            tintColor={COLORS.text}
-            colors={[COLORS.text]}
-            accessibilityLiveRegion="polite"
-          />
-        }
-      />
+      <View>
+        <FlatList
+          horizontal
+          bounces={false}
+          data={getCategories ?? []}
+          renderItem={({ item }) => (
+            <CategoryItem
+              item={item}
+              selected={item.Id === selectedId}
+              onPress={() => setSelectedId(item.Id)}
+            />
+          )}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={{
+            backgroundColor: COLORS.headerColor,
+          }}
+        />
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={subCategories}
+          keyExtractor={(item) => item?.Id?.toString()}
+          renderItem={({ item }) => (
+            <View style={{ marginBottom: 24 }}>
+              <Text style={{ fontSize: 18, fontWeight: "700" }}>
+                {item?.Name}
+              </Text>
+
+              <FlatList
+                data={item?.Product}
+                // data={
+                //   subCategoryId === item?.Id
+                //     ? paginatedProducts // pagination wala data
+                //     : item?.Product // initial dashboard data
+                // }
+                keyExtractor={(prod) => prod?.Id?.toString()}
+                renderItem={renderProduct}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onEndReached={() => onProductEndReached(item?.Id)}
+                onEndReachedThreshold={0.5}
+              />
+            </View>
+          )}
+          onEndReached={() => hasNextPage && fetchNextPage()}
+          onEndReachedThreshold={0.5}
+        />
+      </View>
     </View>
   );
 };
