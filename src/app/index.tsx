@@ -1,6 +1,6 @@
 import { COLORS } from "@/src/constants/theme";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import AppHeader from "../components/AppHeader";
 import CategoryItem from "../components/CategoryItem";
@@ -13,6 +13,7 @@ import {
 const index = () => {
   const [selectedId, setSelectedId] = useState<number | null>(59);
   const [subCategoryId, setSubCategoryId] = useState<number | null>(null);
+  const [finalData, setFinalData] = useState([]);
 
   const {
     data: categories,
@@ -50,6 +51,21 @@ const index = () => {
       (page) => page.Result.Category[0].SubCategories
     ) ?? [];
 
+  useEffect(() => {
+    if (!subCategoryId) return;
+    const response = subCategories.map((item) => {
+      if (item?.Id === subCategoryId) {
+        return {
+          ...item,
+          Product: [...(item?.Product || []), ...paginatedProducts],
+        };
+      } else {
+        return item;
+      }
+    });
+    setFinalData(response);
+  }, [data]);
+
   const getCategories = useMemo(() => {
     return (
       categories?.Result?.Category?.flatMap((page: any) => page || []) || []
@@ -68,13 +84,10 @@ const index = () => {
   );
 
   const onProductEndReached = (id: number) => {
-    if (subCategoryId !== id) {
-      setSubCategoryId(id);
-      return;
-    }
+    setSubCategoryId(id);
 
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+    if (hasNextPageProducts && !isFetchingNextPageProducts) {
+      fetchNextPageProducts();
     }
   };
 
@@ -107,7 +120,7 @@ const index = () => {
 
       <View style={{ flex: 1 }}>
         <FlatList
-          data={subCategories}
+          data={subCategoryId ? finalData : subCategories}
           keyExtractor={(item) => item?.Id?.toString()}
           renderItem={({ item }) => (
             <View style={{ marginBottom: 24 }}>
@@ -117,11 +130,6 @@ const index = () => {
 
               <FlatList
                 data={item?.Product}
-                // data={
-                //   subCategoryId === item?.Id
-                //     ? paginatedProducts // pagination wala data
-                //     : item?.Product // initial dashboard data
-                // }
                 keyExtractor={(prod) => prod?.Id?.toString()}
                 renderItem={renderProduct}
                 horizontal

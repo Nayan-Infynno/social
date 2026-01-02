@@ -33,7 +33,7 @@ export const useProductsBySubCategory = (subCategoryId: number) => {
   return useInfiniteQuery({
     queryKey: ["products", subCategoryId],
     enabled: !!subCategoryId,
-    initialPageParam: 1,
+    initialPageParam: 2,
 
     queryFn: ({ pageParam }) =>
       ceramicAPI.getProducts({
@@ -47,21 +47,3 @@ export const useProductsBySubCategory = (subCategoryId: number) => {
     },
   });
 };
-
-export function useProducts(subCategoryId: number) {
-  return useInfiniteQuery({
-    queryKey: ["products", subCategoryId],
-    enabled: !!subCategoryId,
-
-    queryFn: ({ pageParam = 1 }) =>
-      ceramicAPI.getProducts({
-        SubCategoryId: subCategoryId,
-        PageIndex: pageParam,
-      }),
-
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage?.Result?.length > 0 ? allPages.length + 1 : undefined,
-
-    initialPageParam: 1,
-  });
-}
